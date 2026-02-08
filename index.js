@@ -8,9 +8,10 @@ const PORT = process.env.PORT || 8081
 
 const app = express()
 app.use(cors())
-app.use(express.json({limit : "5mb"}))
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
-const bd_url = "mongodb+srv://mikerufcg:adubosdaora123@fertintelligence-tcc.smehfzj.mongodb.net/FertIntelligence-Images?retryWrites=true&w=majority&appName=FertIntelligence-TCC";
+const bd_url = "mongodb+srv://mikerufcg:adubosdaora123@fertintelligence-tcc.smehfzj.mongodb.net/FertIntelligence?retryWrites=true&w=majority&appName=FertIntelligence-TCC";
 
 mongoose.connect(bd_url)
 .then(() =>{
@@ -71,7 +72,8 @@ app.delete('/delete/:id', (req, res) => {
 
 app.patch('/update/:id', (req, res) => {
     const updates = req.body
-  
+
+    console.log(req.body)
     if (ObjectId.isValid(req.params.id)) {
         imageModel
         .updateOne({ _id: new ObjectId(req.params.id) }, {$set: updates})
