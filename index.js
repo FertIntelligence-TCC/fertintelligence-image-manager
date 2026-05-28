@@ -50,14 +50,18 @@ app.get('/get/:id', async (req, res) => {
 })
 
 app.post('/upload', async (req, res) => {
-  const image = getImageFromPayload({ img: req.body?.img })
+  const image = getImageFromPayload(req.body)
 
   if (!image) {
-    return res.status(400).json({ error: 'Missing required field: img' })
+    return res.status(400).json({ error: 'Missing required field: image or img' })
   }
 
-  const data = await new imageModel({ image }).save()
-  return res.send({ data })
+  try {
+    const data = await new imageModel({ image }).save()
+    return res.send({ data })
+  } catch (error) {
+    return res.status(500).json({ error: 'Could not persist uploaded image' })
+  }
 })
 
 app.delete('/delete/:id', (req, res) => {
