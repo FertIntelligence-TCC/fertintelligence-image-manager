@@ -7,11 +7,26 @@ require('dotenv').config();
 const PORT = process.env.PORT || 8081
 
 const app = express()
-app.use(cors())
+const allowedOrigins = (process.env.IMAGE_MANAGER_ALLOWED_ORIGINS || 'http://localhost:5173')
+  .split(',')
+  .map((origin) => origin.trim().replace(/\/$/, ''))
+  .filter(Boolean)
+
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin.replace(/\/$/, ''))) {
+      return callback(null, true)
+    }
+    return callback(new Error('Origin not allowed by CORS'))
+  }
+}))
 app.use(express.json({ limit: '50mb' }))
 app.use(express.urlencoded({ extended: true, limit: '50mb' }))
 
-const bd_url = 'mongodb+srv://mikerufcg:adubosdaora123@fertintelligence-tcc.smehfzj.mongodb.net/FertIntelligence?retryWrites=true&w=majority&appName=FertIntelligence-TCC'
+const bd_url = process.env.MONGODB_URI
+if (!bd_url) {
+  throw new Error('MONGODB_URI is required')
+}
 
 mongoose.connect(bd_url)
   .then(() => {
@@ -34,6 +49,10 @@ const getImageFromPayload = (body) => {
 
 app.get('/', async (req, res) => {
   res.json({ message: 'Server running', data: res.statusCode })
+})
+
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' })
 })
 
 app.get('/get/:id', async (req, res) => {
@@ -99,4 +118,4 @@ app.patch('/update/:id', (req, res) => {
     })
 })
 
-app.listen(PORT, () => console.log('Server is running at ' + PORT))
+app.listen(PORT, '0.0.0.0', () => console.log('Server is running at ' + PORT))

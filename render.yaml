@@ -1,0 +1,15 @@
+services:
+  - type: web
+    runtime: node
+    name: fertintelligence-image-api
+    branch: m-fertilization
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: IMAGE_MANAGER_ALLOWED_ORIGINS
+        value: https://fertintelligence-client.onrender.com
+      - key: MONGODB_URI
+        sync: false
